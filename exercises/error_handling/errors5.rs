@@ -9,12 +9,28 @@
 use std::error;
 use std::fmt;
 use std::num::ParseIntError;
+#[derive(Debug)]
+enum MyError{
+    Parse(ParseIntError),
+    Positive(CreationError),
+}
+
+impl From<ParseIntError> for MyError{
+    fn from(err: ParseIntError) -> MyError{
+        MyError::Parse(err)
+    }
+}
+impl From<CreationError> for MyError{
+    fn from(err: CreationError) -> MyError{
+        MyError::Positive(err)
+    }
+}
 
 // TODO: update the return type of `main()` to make this compile.
-fn main() -> Result<(), ParseIntError> {
+fn main() -> Result<(), MyError> {
     let pretend_user_input = "42";
-    let x: i64 = pretend_user_input.parse()?;
-    println!("output={:?}", PositiveNonzeroInteger::new(x)?);
+    let x: i64 = try!(pretend_user_input.parse().map_err(MyError::Parse));
+    println!("output={:?}", try!(PositiveNonzeroInteger::new(x).map_err(MyError::Positive)));
     Ok(())
 }
 
